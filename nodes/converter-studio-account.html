@@ -1,0 +1,52 @@
+<script type="text/javascript">
+  RED.nodes.registerType('converter-studio-account', {
+    category: 'Converter Studio',
+    color: '#E9967A',
+    defaults: {
+      name: { value: '' },
+      server: { value: '', type: 'converter-studio-config', required: true },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'converter-studio.svg',
+    paletteLabel: 'account',
+    label: function () {
+      return this.name || 'Converter Studio account';
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : '';
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="converter-studio-account">
+  <div class="form-row">
+    <label for="node-input-server"><i class="fa fa-user"></i> Account</label>
+    <input type="text" id="node-input-server" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+</script>
+
+<!-- prettier-ignore -->
+<script type="text/markdown" data-help-name="converter-studio-account">
+Reads the [Converter Studio](https://converter.studio) account of the config node's API key: its plan, the credits left and its limits.
+
+### Outputs
+
+: payload (object) : the account: `plan`, `credits` (left now), `allowance`, `packs`, `renewsAt`, `maxFileBytes` (the largest file it can convert) and `maxMediaSeconds`.
+
+### Details
+
+Use it to check the API key, or the credits before a large batch of files. It costs nothing.
+
+### Errors
+
+A wrong key stops the message with the code `invalidApiKey` in `msg.error.code`.
+
+### References
+
+- [Pricing](https://converter.studio/pricing)
+</script>

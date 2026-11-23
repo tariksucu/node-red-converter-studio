@@ -1,0 +1,212 @@
+<script type="text/javascript">
+  RED.nodes.registerType('converter-studio-convert', {
+    category: 'Converter Studio',
+    color: '#E9967A',
+    defaults: {
+      name: { value: '' },
+      server: { value: '', type: 'converter-studio-config', required: true },
+      source: { value: 'payload', required: true },
+      sourceType: { value: 'msg' },
+      fileName: { value: 'filename' },
+      fileNameType: { value: 'msg' },
+      to: { value: '', required: true },
+      toType: { value: 'str' },
+      options: { value: '{}' },
+      optionsType: { value: 'json' },
+      maxCredits: {
+        value: 20,
+        required: true,
+        validate: function (v) {
+          return /^\d+$/.test(String(v));
+        },
+      },
+      aboveMax: { value: 'error' },
+      wait: { value: true },
+      output: { value: 'buffer' },
+      timeout: {
+        value: 600,
+        validate: function (v) {
+          return /^\d+$/.test(String(v)) && Number(v) > 0;
+        },
+      },
+      callbackUrl: { value: '' },
+      callbackUrlType: { value: 'str' },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'converter-studio.svg',
+    paletteLabel: 'convert',
+    label: function () {
+      if (this.name) return this.name;
+      return this.toType === 'str' && this.to ? 'convert to ' + this.to.toUpperCase() : 'convert';
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : '';
+    },
+    oneditprepare: function () {
+      $('#node-input-source').typedInput({
+        default: 'msg',
+        types: ['msg', 'flow', 'global'],
+        typeField: '#node-input-sourceType',
+      });
+      $('#node-input-fileName').typedInput({
+        default: 'msg',
+        types: ['msg', 'flow', 'global', 'str', 'env'],
+        typeField: '#node-input-fileNameType',
+      });
+      $('#node-input-to').typedInput({
+        default: 'str',
+        types: ['str', 'msg', 'flow', 'global', 'env'],
+        typeField: '#node-input-toType',
+      });
+      $('#node-input-options').typedInput({
+        default: 'json',
+        types: ['json', 'msg', 'flow', 'global'],
+        typeField: '#node-input-optionsType',
+      });
+      $('#node-input-callbackUrl').typedInput({
+        default: 'str',
+        types: ['str', 'msg', 'flow', 'global', 'env'],
+        typeField: '#node-input-callbackUrlType',
+      });
+      var toggle = function () {
+        var wait = $('#node-input-wait').is(':checked');
+        $('.converter-studio-wait').toggle(wait);
+        $('.converter-studio-nowait').toggle(!wait);
+      };
+      $('#node-input-wait').on('change', toggle);
+      toggle();
+      // Suggestions for "Convert to": every format Converter Studio can make (no key needed).
+      var list = $('#converter-studio-convert-formats');
+      $.getJSON('converter-studio/formats', { server: $('#node-input-server').val() || '' })
+        .done(function (data) {
+          var seen = {};
+          (data.formats || []).forEach(function (format) {
+            (format.to || []).forEach(function (id) {
+              if (!seen[id]) {
+                seen[id] = true;
+                $('<option>').attr('value', id).appendTo(list);
+              }
+            });
+          });
+        })
+        .fail(function () {
+          // No suggestions: the field still takes any format.
+        });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="converter-studio-convert">
+  <div class="form-row">
+    <label for="node-input-server"><i class="fa fa-user"></i> Account</label>
+    <input type="text" id="node-input-server" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-source"><i class="fa fa-file-o"></i> File</label>
+    <input type="text" id="node-input-source" style="width: 70%" />
+    <input type="hidden" id="node-input-sourceType" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-fileName"><i class="fa fa-font"></i> File name</label>
+    <input type="text" id="node-input-fileName" style="width: 70%" />
+    <input type="hidden" id="node-input-fileNameType" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-to"><i class="fa fa-exchange"></i> Convert to</label>
+    <input
+      type="text"
+      id="node-input-to"
+      style="width: 70%"
+      list="converter-studio-convert-formats"
+      placeholder="pdf, jpg, mp4…"
+    />
+    <input type="hidden" id="node-input-toType" />
+    <datalist id="converter-studio-convert-formats"></datalist>
+  </div>
+  <div class="form-row">
+    <label for="node-input-options"><i class="fa fa-sliders"></i> Options</label>
+    <input type="text" id="node-input-options" style="width: 70%" />
+    <input type="hidden" id="node-input-optionsType" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-maxCredits"><i class="fa fa-money"></i> Max credits</label>
+    <input type="number" id="node-input-maxCredits" min="0" step="1" style="width: 90px" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-aboveMax"><i class="fa fa-hand-paper-o"></i> Above max</label>
+    <select id="node-input-aboveMax" style="width: 70%">
+      <option value="error">Stop with an error</option>
+      <option value="quote">Send the quote</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-wait"><i class="fa fa-hourglass-half"></i> Wait</label>
+    <input
+      type="checkbox"
+      id="node-input-wait"
+      style="display: inline-block; width: auto; vertical-align: top"
+    />
+    <label for="node-input-wait" style="width: 70%"> Wait for the result</label>
+  </div>
+  <div class="form-row converter-studio-wait">
+    <label for="node-input-output"><i class="fa fa-sign-out"></i> Output</label>
+    <select id="node-input-output" style="width: 70%">
+      <option value="buffer">The file, as a Buffer</option>
+      <option value="url">Its download link</option>
+      <option value="conversion">The conversion only</option>
+    </select>
+  </div>
+  <div class="form-row converter-studio-wait">
+    <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
+    <input type="number" id="node-input-timeout" min="1" step="1" style="width: 90px" /> seconds
+  </div>
+  <div class="form-row converter-studio-nowait">
+    <label for="node-input-callbackUrl"><i class="fa fa-bell-o"></i> Callback URL</label>
+    <input type="text" id="node-input-callbackUrl" style="width: 70%" placeholder="https://…" />
+    <input type="hidden" id="node-input-callbackUrlType" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+</script>
+
+<!-- prettier-ignore -->
+<script type="text/markdown" data-help-name="converter-studio-convert">
+Converts a file to another format with [Converter Studio](https://converter.studio): video, audio, images, PDFs, documents, e-books, subtitles, data and archives, 67 formats in all.
+
+### Inputs
+
+: payload (Buffer | string) : the file: a Buffer with its bytes, the path of a file on this machine, or an `https://` link that Converter Studio downloads itself (a direct link, or a Google Drive, Dropbox or OneDrive link that anyone can open). **File** sets where the node reads it.
+: *filename* (string) : the name of a Buffer's file, so that its format is known. A path counts only by its last part, so the `msg.filename` of a **read file** node works as it is. **File name** sets where the node reads it.
+
+### Outputs
+
+: payload (Buffer | string | object) : the converted file as a Buffer, its download link, or the conversion, as **Output** says.
+: filename (string) : the converted file's name, for example `report.pdf`.
+: contentType (string) : its media type, for example `application/pdf` (Buffer output only).
+: conversion (object) : the conversion: `id`, `status`, `from`, `to`, `credits`, `outputName`, `outputSize`, `downloadUrl`, `expiresAt` and `error`.
+
+### Details
+
+**Convert to** is the target format, for example `pdf`, `jpg`, `webp`, `mp4` or `mp3`. It can come from the message (`msg.format`), a context or an environment variable. If the file's format can't become it, the node says what it converts to instead, before anything is charged.
+
+**Options** holds the settings of the conversion as a JSON object, for example `{"quality": "high"}`, `{"maxKb": 300}` for a JPG of at most 300 KB, `{"height": "720"}` for a video, or `{"ocr": true, "ocrLanguage": "en"}` for a scanned PDF to Word. It can come from the message (`msg.options`). Each option applies only to some conversions; the README lists them.
+
+**Max credits** (default 20) is the most a conversion may cost to start on its own; `0` only asks for the price. A conversion that costs more is *quoted* and waits. **Above max** then either stops the message with an error, or sends it on with `msg.conversion.status` set to `quoted` and the price in `msg.conversion.credits`: start it later with a **conversion** node set to *Confirm*.
+
+**Wait for the result** (on by default) waits until the conversion is done, up to **Timeout** (600 seconds by default). After the timeout the message stops with an error that names the conversion, which goes on at Converter Studio: get it with a **conversion** node and `msg.conversion.id`. Without waiting, the node sends the conversion on at once; a **Callback URL** then lets Converter Studio call an **http in** node of a flow when it ends. The address must be an `https://` address that can be reached from the internet.
+
+Every file costs credits of the account in the config node, the same as on the website. Results are kept for 6 hours; anyone with the download link can download the result until then.
+
+### Errors
+
+Errors carry Converter Studio's own message, for example *This needs 3 credits and you have 1.* A **catch** node gets the code in `msg.error.code` (such as `notEnoughCredits`, `fileTooLarge`, `unsupportedConversion`, `quoted`, `timeout` or `invalidApiKey`) and the conversion in `msg.conversion` when there is one. A message that is stopped by a new deploy while it waits only gives a warning: its conversion goes on.
+
+### References
+
+- [Converter Studio API](https://converter.studio/developers): formats, options and limits
+- [Pricing](https://converter.studio/pricing) and [privacy policy](https://converter.studio/privacy)
+- [README and issues](https://github.com/tariksucu/node-red-converter-studio)
+</script>

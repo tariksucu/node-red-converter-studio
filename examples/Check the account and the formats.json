@@ -1,0 +1,83 @@
+[
+  {
+    "id": "e5c0e1f2b3c4d501",
+    "type": "comment",
+    "name": "The credits left, and what a format converts to",
+    "info": "**Account** reads the plan of your API key and the credits left (`msg.payload.credits`): a quick way to check the key in the config node. **Formats** lists what HEIC converts to; leave its **Only** field empty for every format. Neither costs anything.",
+    "x": 240,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "e5c0e1f2b3c4d502",
+    "type": "inject",
+    "name": "Check",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 120,
+    "wires": [["e5c0e1f2b3c4d503", "e5c0e1f2b3c4d505"]]
+  },
+  {
+    "id": "e5c0e1f2b3c4d503",
+    "type": "converter-studio-account",
+    "name": "",
+    "server": "cf0c5e0a1d2b3c4d",
+    "x": 350,
+    "y": 120,
+    "wires": [["e5c0e1f2b3c4d504"]]
+  },
+  {
+    "id": "e5c0e1f2b3c4d504",
+    "type": "debug",
+    "name": "The account",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 570,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "e5c0e1f2b3c4d505",
+    "type": "converter-studio-formats",
+    "name": "",
+    "server": "cf0c5e0a1d2b3c4d",
+    "from": "heic",
+    "fromType": "str",
+    "x": 340,
+    "y": 180,
+    "wires": [["e5c0e1f2b3c4d506"]]
+  },
+  {
+    "id": "e5c0e1f2b3c4d506",
+    "type": "debug",
+    "name": "HEIC converts to",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload[0].to",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 580,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "cf0c5e0a1d2b3c4d",
+    "type": "converter-studio-config",
+    "name": "Converter Studio",
+    "baseUrl": "https://converter.studio/api"
+  }
+]

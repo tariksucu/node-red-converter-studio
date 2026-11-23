@@ -1,0 +1,121 @@
+<script type="text/javascript">
+  RED.nodes.registerType('converter-studio-conversion', {
+    category: 'Converter Studio',
+    color: '#E9967A',
+    defaults: {
+      name: { value: '' },
+      server: { value: '', type: 'converter-studio-config', required: true },
+      action: { value: 'get' },
+      conversionId: { value: 'conversion.id', required: true },
+      conversionIdType: { value: 'msg' },
+      wait: { value: true },
+      output: { value: 'buffer' },
+      timeout: {
+        value: 600,
+        validate: function (v) {
+          return /^\d+$/.test(String(v)) && Number(v) > 0;
+        },
+      },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'converter-studio.svg',
+    paletteLabel: 'conversion',
+    label: function () {
+      return this.name || (this.action === 'confirm' ? 'confirm conversion' : 'get conversion');
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : '';
+    },
+    oneditprepare: function () {
+      $('#node-input-conversionId').typedInput({
+        default: 'msg',
+        types: ['msg', 'flow', 'global', 'str', 'env'],
+        typeField: '#node-input-conversionIdType',
+      });
+      var toggle = function () {
+        $('.converter-studio-wait').toggle($('#node-input-wait').is(':checked'));
+      };
+      $('#node-input-wait').on('change', toggle);
+      toggle();
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="converter-studio-conversion">
+  <div class="form-row">
+    <label for="node-input-server"><i class="fa fa-user"></i> Account</label>
+    <input type="text" id="node-input-server" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-action"><i class="fa fa-cog"></i> Action</label>
+    <select id="node-input-action" style="width: 70%">
+      <option value="get">Get</option>
+      <option value="confirm">Confirm (start a quoted conversion)</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-conversionId"><i class="fa fa-hashtag"></i> Conversion</label>
+    <input type="text" id="node-input-conversionId" style="width: 70%" />
+    <input type="hidden" id="node-input-conversionIdType" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-wait"><i class="fa fa-hourglass-half"></i> Wait</label>
+    <input
+      type="checkbox"
+      id="node-input-wait"
+      style="display: inline-block; width: auto; vertical-align: top"
+    />
+    <label for="node-input-wait" style="width: 70%"> Wait until it is finished</label>
+  </div>
+  <div class="form-row">
+    <label for="node-input-output"><i class="fa fa-sign-out"></i> Output</label>
+    <select id="node-input-output" style="width: 70%">
+      <option value="buffer">The file, as a Buffer</option>
+      <option value="url">Its download link</option>
+      <option value="conversion">The conversion only</option>
+    </select>
+  </div>
+  <div class="form-row converter-studio-wait">
+    <label for="node-input-timeout"><i class="fa fa-clock-o"></i> Timeout</label>
+    <input type="number" id="node-input-timeout" min="1" step="1" style="width: 90px" /> seconds
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+</script>
+
+<!-- prettier-ignore -->
+<script type="text/markdown" data-help-name="converter-studio-conversion">
+Gets a [Converter Studio](https://converter.studio) conversion by its ID, with its result once it is done, or confirms one that was quoted.
+
+### Inputs
+
+: conversion.id (string) : the conversion's ID, as a **convert** node puts it in `msg.conversion`. **Conversion** sets where the node reads it; it may also point at an object with an `id`.
+
+### Outputs
+
+: payload (Buffer | string | object) : once the conversion is done, the file as a Buffer or its download link, as **Output** says; otherwise the conversion.
+: filename (string) : the converted file's name, once it is done.
+: contentType (string) : its media type (Buffer output only).
+: conversion (object) : the conversion: `id`, `status`, `credits`, `outputName`, `downloadUrl`, `expiresAt`, `error` and more.
+
+### Details
+
+**Get** reads the conversion: use it after a **convert** node's timeout, or in a flow that an **http in** node starts when Converter Studio calls the convert node's callback URL (the conversion's ID is then in `msg.payload.conversion.id`). A conversion that failed is sent on with `msg.conversion.status` set to `failed` and the reason in `msg.conversion.error`, so check the status, for example with a **switch** node.
+
+**Confirm** starts a conversion that a **convert** node quoted because it costs more than its max credits, for example after an approval. A confirmed conversion that fails stops the message with an error.
+
+**Wait until it is finished** (on by default) waits up to **Timeout** seconds; without it the node sends the conversion as it is right away.
+
+Conversions are kept for 6 hours, and only the account that started one can see it.
+
+### Errors
+
+Errors carry Converter Studio's own message; a **catch** node gets the code in `msg.error.code` (such as `notFound`, `fileExpired`, `notEnoughCredits` or `timeout`).
+
+### References
+
+- [Converter Studio API](https://converter.studio/developers)
+</script>

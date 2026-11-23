@@ -1,0 +1,60 @@
+<script type="text/javascript">
+  RED.nodes.registerType('converter-studio-config', {
+    category: 'config',
+    defaults: {
+      name: { value: '' },
+      baseUrl: {
+        value: 'https://converter.studio/api',
+        required: true,
+        validate: function (v) {
+          return /^https?:\/\/[^/\s?#]+/i.test(v || '');
+        },
+      },
+    },
+    credentials: {
+      apiKey: { type: 'password' },
+    },
+    label: function () {
+      return this.name || 'Converter Studio';
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="converter-studio-config">
+  <div class="form-row">
+    <label for="node-config-input-apiKey"><i class="fa fa-key"></i> API key</label>
+    <input type="password" id="node-config-input-apiKey" placeholder="cvs_live_…" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-baseUrl"><i class="fa fa-globe"></i> Base URL</label>
+    <input type="text" id="node-config-input-baseUrl" placeholder="https://converter.studio/api" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-config-input-name" placeholder="Converter Studio" />
+  </div>
+  <div class="form-tips">
+    Make an API key on your
+    <a href="https://converter.studio/account#api-keys" target="_blank" rel="noopener"
+      >Converter Studio account page</a
+    >. A free account works.
+  </div>
+</script>
+
+<!-- prettier-ignore -->
+<script type="text/markdown" data-help-name="converter-studio-config">
+The [Converter Studio](https://converter.studio) account the Converter Studio nodes use.
+
+### Details
+
+**API key**: make one on your [account page](https://converter.studio/account#api-keys) (a free account works; it gets 13 credits a day). Keys start with `cvs_live_` and are shown once. Node-RED keeps the key with its credentials, not in the flow, so exporting a flow leaves it out.
+
+**Base URL**: the address of the Converter Studio API, `https://converter.studio/api`. Change it only to use another Converter Studio server.
+
+Every conversion uses the account's credits, the same as on the website. Most files cost 1 credit; audio and video are priced once Converter Studio has measured them. See the [pricing page](https://converter.studio/pricing).
+
+### References
+
+- [Converter Studio API](https://converter.studio/developers)
+- [Privacy policy](https://converter.studio/privacy)
+</script>

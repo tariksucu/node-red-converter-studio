@@ -1,0 +1,67 @@
+<script type="text/javascript">
+  RED.nodes.registerType('converter-studio-formats', {
+    category: 'Converter Studio',
+    color: '#E9967A',
+    defaults: {
+      name: { value: '' },
+      server: { value: '', type: 'converter-studio-config', required: false },
+      from: { value: '' },
+      fromType: { value: 'str' },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'converter-studio.svg',
+    paletteLabel: 'formats',
+    label: function () {
+      if (this.name) return this.name;
+      return this.fromType === 'str' && this.from
+        ? this.from.toUpperCase() + ' converts to'
+        : 'Converter Studio formats';
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : '';
+    },
+    oneditprepare: function () {
+      $('#node-input-from').typedInput({
+        default: 'str',
+        types: ['str', 'msg', 'flow', 'global', 'env'],
+        typeField: '#node-input-fromType',
+      });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="converter-studio-formats">
+  <div class="form-row">
+    <label for="node-input-server"><i class="fa fa-user"></i> Account</label>
+    <input type="text" id="node-input-server" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-from"><i class="fa fa-filter"></i> Only</label>
+    <input type="text" id="node-input-from" style="width: 70%" placeholder="all formats" />
+    <input type="hidden" id="node-input-fromType" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+</script>
+
+<!-- prettier-ignore -->
+<script type="text/markdown" data-help-name="converter-studio-formats">
+Lists the formats [Converter Studio](https://converter.studio) converts, and what each converts to.
+
+### Outputs
+
+: payload (array) : the formats, each with `id` (for example `docx`), `name`, `category`, `extensions` and `to` (the formats it converts to).
+
+### Details
+
+**Only** limits the list to one source format, for example `heic`; leave it empty for every format. It can come from the message, for example `msg.format`.
+
+The list needs no API key and costs nothing. The config node is optional: without one, the node asks `https://converter.studio/api`.
+
+### References
+
+- [Converter Studio API](https://converter.studio/developers)
+</script>

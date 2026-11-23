@@ -1,0 +1,64 @@
+{
+  "name": "@converterstudio/node-red-converter-studio",
+  "version": "1.0.0",
+  "description": "Node-RED nodes for Converter Studio: convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives (67 formats) in your flows.",
+  "keywords": [
+    "node-red",
+    "converter-studio",
+    "file-converter",
+    "file-conversion",
+    "convert",
+    "pdf",
+    "video",
+    "image",
+    "audio",
+    "document",
+    "heic",
+    "ocr"
+  ],
+  "homepage": "https://converter.studio",
+  "bugs": {
+    "url": "https://github.com/tariksucu/node-red-converter-studio/issues",
+    "email": "support@converter.studio"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tariksucu/node-red-converter-studio.git"
+  },
+  "license": "MIT",
+  "author": "Converter Studio <support@converter.studio> (https://converter.studio)",
+  "type": "commonjs",
+  "files": [
+    "nodes",
+    "examples",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "node-red": {
+    "version": ">=4.0.0",
+    "nodes": {
+      "converter-studio-config": "nodes/converter-studio-config.js",
+      "converter-studio-convert": "nodes/converter-studio-convert.js",
+      "converter-studio-conversion": "nodes/converter-studio-conversion.js",
+      "converter-studio-account": "nodes/converter-studio-account.js",
+      "converter-studio-formats": "nodes/converter-studio-formats.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node --test \"test/*.test.js\"",
+    "validate": "npx --yes node-red-dev@0.1.6 validate"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.15.0",
+    "globals": "17.14.0",
+    "node-red": "5.0.10",
+    "node-red-node-test-helper": "0.3.6"
+  }
+}
