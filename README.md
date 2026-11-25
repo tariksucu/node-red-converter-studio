@@ -31,7 +31,7 @@ Each node has its own help in the editor's help sidebar.
 
 You need a Converter Studio account and an API key:
 
-1. Sign in at [converter.studio](https://converter.studio). A free account works; it gets 13 credits a day.
+1. Sign in at [converter.studio](https://converter.studio). A free account works; it gets 25 credits a day.
 2. Open your [account page](https://converter.studio/account#api-keys) and create an API key. Keys start with `cvs_live_` and are shown once.
 3. In Node-RED, add a convert node, open it, and add a **Converter Studio** config node next to **Account**. Paste the key into **API key**. Leave **Base URL** as it is (`https://converter.studio/api`); change it only to use another Converter Studio server.
 
