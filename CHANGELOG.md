@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- The Converter Studio node's help says a free account gets 25 credits a day (it said 13).
+
 ## 1.0.0
 
 First release.

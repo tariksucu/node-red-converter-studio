@@ -1,6 +1,6 @@
 {
   "name": "@converterstudio/node-red-converter-studio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node-RED nodes for Converter Studio: convert video, audio, images, PDFs, documents, e-books, subtitles, data and archives (67 formats) in your flows.",
   "keywords": [
     "node-red",
